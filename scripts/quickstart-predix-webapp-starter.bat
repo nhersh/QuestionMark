@@ -38,7 +38,7 @@ SET TUTORIAL=https://www.predix.io/resources/tutorials/tutorial-details.html?tut
 SET REPO_NAME=predix-webapp-starter
 SET SHELL_SCRIPT_NAME=quickstart-predix-webapp-starter.sh
 SET APP_DIR="webapp-starter"
-SET APP_NAME=Predix WebApp Starter
+SET APP_NAME=QuestionMark/? Analytics
 SET TOOLS=Cloud Foundry CLI, Git, Node.js, Predix CLI
 SET TOOLS_SWITCHES=/cf /git /nodejs /predixcli
 
