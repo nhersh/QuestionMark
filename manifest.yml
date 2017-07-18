@@ -1,18 +1,20 @@
 ---
 applications:
-  - name: predix-webapp-starter
+  - name: questionmark-consistorian-hyperconstitutionalism
     memory: 128M
     timeout: 180
     buildpack: nodejs_buildpack
     command: node server/app.js
-    path: dist
+  #  path: dist
 #services:
- # - your-name-uaa
+  # - uaa
  # - your-name-time-series
  # - your-name-asset
 env:
     node_env: cloud
     uaa_service_label : predix-uaa
+    UAA_URI : https://ff2359d6-05b4-4a0f-9001-2533c77cfe9d.predix-uaa.run.aws-usw02-pr.ice.predix.io/oauth/token
+    UAA_Authorization : Basic dHMtY2xpZW50MTpLZld1cHhTd001Q1hmaDg=
     # Add these values for authentication in the cloud
     #base64ClientCredential: dWFhLWNsaWVudC1pZDp1YWEtY2xpZW50LWlkLXNlY3JldA==
     #loginBase64ClientCredential: bG9naW5fY2xpZW50X2lkOnNlY3JldA==

@@ -242,7 +242,7 @@ app.use(function(err, req, res, next) {
 	}
 });
 
-httpServer.listen(process.env.VCAP_APP_PORT || 6005, function () {
+httpServer.listen(process.env.VCAP_APP_PORT || 8000, function () {
 	console.log ('Server started on port: ' + httpServer.address().port);
 });
 
