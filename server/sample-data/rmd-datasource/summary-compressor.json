@@ -1,24 +1,16 @@
 [{
 	"kpis": [{
-		"value": "0.049",
+		"value": "0",
 		"label": "Output (avg)",
-		"uom": "m/s"
+		"uom": "v"
 	}, {
-		"value": "2.75",
-		"label": "crank-frame-compressionratio (avg)",
-		"uom": null
-	}, {
-		"value": "60.0",
-		"label": "Reliability",
-		"uom": "%"
-	}, {
-		"value": "85.0",
-		"label": "Availability",
-		"uom": "%"
+		"value": "72.5",
+		"label": "Temperature",
+		"uom": "F"
 	}],
 	"overall": {
-		"title": "KPI Health",
+		"title": "Turbine Status",
 		"subtitle": "compressor-2017",
-		"percentage": 85.0
+		"percentage": 50.0
 	}
 }]
