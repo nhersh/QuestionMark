@@ -93,6 +93,23 @@
           "nodeName": "Compressor-2017:Turbine2Voltage",
           "controllerUri": "/asset/Bently.Nevada.3500.Rack1"
         }
+      },
+      "crank-frame-turbine3-voltage": {
+        "complexType": "AssetTag",
+        "label": "Turbine 3 Voltage",
+        "tagUri": "/tag/crank-frame-turbine3-voltage",
+        "hiAlarmThreshold": 3,
+        "loAlarmThreshold": 2.5,
+        "isKpi": true,
+        "timeseriesDatasource": {
+          "complexType": "TimeseriesDatasource",
+          "tag": "Compressor-2017:Turbine3Voltage"
+        },
+        "edgeDatasource": {
+          "complexType": "EdgeDatasource",
+          "nodeName": "Compressor-2017:Turbine3Voltage",
+          "controllerUri": "/asset/Bently.Nevada.3500.Rack1"
+        }
       }
     },
     "attributes": {
