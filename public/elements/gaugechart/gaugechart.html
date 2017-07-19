@@ -1,8 +1,9 @@
-  <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../../bower_components/px-vis-timeseries/px-vis-timeseries.html">
 <link rel="import" href="../../bower_components/px-card/px-card.html">
 <link rel="import" href="../../bower_components/px-rangepicker/px-rangepicker.html">
+<link rel="import" href="/bower_components/px-gauge/px-gauge.html"/>
 <!-- Since this is loading asynchronously, we're not loading px-dropdown here for now.
       it's already loaded by rmd-view. -->
 <link rel="import" href="timeseries-chart-styles.html">
@@ -14,9 +15,9 @@ This component allows users to select timeseries tag(s) for display on a chart.
 An array of tags should be passed in.
 Component will query for new data when tags or dates are changed.
 -->
-<dom-module id="timeseries-chart">
+<dom-module id="gaugechart">
     <template>
-      <style include="timeseries-chart-styles"></style>
+      <style include="gaugechart-styles"></style>
       <px-card>
         <div class="u-pt flex flex--row flex--justify">
           <div class="u-1/4-desk u-1/1-palm">
@@ -34,72 +35,20 @@ Component will query for new data when tags or dates are changed.
         </div>
         <div style="height: 400px;">
           <h4 style="margin-bottom: -40px">[[modeLabel]]</h4>
-          <px-vis-timeseries id="tsChart"
-              chart-data="{{tsChartData}}"
-              chart-extents='{"x":["dynamic","dynamic"],"y":["dynamic","dynamic"]}'
-              register-config='{"truncationLength": 25}'
-              series-config="{{tsSeriesConfig}}"
-              clean-on-detached>
-          </px-vis-timeseries>
+          <px-gauge-chart value="30" id="gaugeChart"
+            max="100"
+            bar-width="0"
+            unit="unit"
+            error="[ [0, 12], [79, 100] ]"
+            abnormal="[  [12, 32], [68, 79]  ]"
+            anomaly="[ [32, 45],  [54, 68]  ]"
+            normal="[ [45, 54] ]">
+          </px-gauge-chart>
         </div>
       </px-card>
       <iron-ajax id="tsAjaxEl" content-type="application/json"></iron-ajax>
     </template>
     <script>
-      updateBoxes = function(data) {
-        console.log("I'm updating this box");
-        var rawData = JSON.parse(data);
-
-        if (rawData.turbine_id == 1) {
-            var c = document.getElementById("turbine1rectangle");
-            document.getElementById("turbine1heartbeat").innerHTML = "ONLINE";
-        } else if (rawData.turbine_id == 2) {
-            var c = document.getElementById("turbine2rectangle");
-            document.getElementById("turbine2heartbeat").innerHTML = "ONLINE";
-        } else {
-            var c = document.getElementById("turbine3rectangle");
-            document.getElementById("turbine3heartbeat").innerHTML = "ONLINE";
-        }
-      },
-
-      updateBoxesOnline = function(id, data) {
-        console.log("I'm updating this box");
-        var rawData = JSON.parse(data);
-        if (id == 1) {
-            var c = document.getElementById("turbine1rectangle");
-            document.getElementById("turbine1heartbeat").innerHTML = ((data==null) ? "OFFLINE" : "ONLINE");
-        } else if (id == 2) {
-            var c = document.getElementById("turbine2rectangle");
-            document.getElementById("turbine2heartbeat").innerHTML = ((data==null) ? "OFFLINE" : "ONLINE");
-        } else {
-            var c = document.getElementById("turbine3rectangle");
-            document.getElementById("turbine3heartbeat").innerHTML = ((data==null) ? "OFFLINE" : "ONLINE");
-        }
-      },
-
-      updateBoxesError = function(tag) {
-        if ( (tag == "Compressor-2017:Turbine1Temperature") ||
-          ("Compressor-2017:Turbine1Voltage") ||
-          ("Compressor-2017:Turbine1Voltage")) { // IF Turbine 1 is down
-          window.alert("Turbine 1 needs immediate attention!");
-          var c = document.getElementById("turbine1rectangle");
-          document.getElementById("turbine1heartbeat").innerHTML = "OFFLINE";
-        } else if ( (tag == "Compressor-2017:Turbine2Temperature") ||
-          ("Compressor-2017:Turbine2Voltage") ||
-          ("Compressor-2017:Turbine2Voltage")) { // IF Turbine 2 is down
-          window.alert("Turbine 1 needs immediate attention!");
-          var c = document.getElementById("turbine2rectangle");
-          document.getElementById("turbine2heartbeat").innerHTML = "OFFLINE";
-        } else { // IF Turbine 3 is down
-          window.alert("Turbine 1 needs immediate attention!");
-          var c = document.getElementById("turbine3rectangle");
-          document.getElementById("turbine3heartbeat").innerHTML = "OFFLINE";
-        }
-        var ctx=c.getContext("2d");
-        ctx.fillStyle = "#FF0000";
-        ctx.fillRect(20,20,150, 100);
-      },
-
     Polymer({
       is: 'timeseries-chart',
       properties: {
@@ -126,7 +75,7 @@ Component will query for new data when tags or dates are changed.
         },
         liveDataMode: {
           type: Boolean,
-          value: true
+          value: false
         },
         modeLabel: {
           value: "Historical Data"
@@ -166,78 +115,6 @@ Component will query for new data when tags or dates are changed.
             this._showLiveSeries(evt.detail.key);
           }
         }.bind(this));
-
-        // Update heartbeat status of turbine 1
-        setInterval(function(){
-          var heartbeat = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/1/heartbeat";
-          console.log('recording heartbeat: ' + heartbeat);
-          var xmlhttp = new XMLHttpRequest();
-          xmlhttp.onreadystatechange = function() {
-            if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
-               if (xmlhttp.status == 200) {
-                var response = xmlhttp.responseText;
-                updateBoxesOnline(1,response);
-              }
-            }
-          }
-
-           xmlhttp.open("GET", heartbeat, true);
-           xmlhttp.send();
-      }, 2000);
-
-      //Balint: Update temperature of turbine 1
-      setInterval(function(){
-        var temperature = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/1/sensors/temperature";
-        console.log('recording temperature: ' + temperature);
-        var xmlhttp = new XMLHttpRequest();
-        xmlhttp.onreadystatechange = function() {
-          if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
-             if (xmlhttp.status == 200) {
-              var response = xmlhttp.responseText;
-              updateBoxesOnline(1,response);
-            }
-          }
-        }
-
-         xmlhttp.open("GET", temperature, true);
-         xmlhttp.send();
-    }, 2000);
-
-        // Update heartbeat status of turbine 2
-        setInterval(function(){
-          var heartbeat = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/2/heartbeat";
-          console.log('recording heartbeat: ' + heartbeat);
-          var xmlhttp = new XMLHttpRequest();
-          xmlhttp.onreadystatechange = function() {
-            if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
-               if (xmlhttp.status == 200) {
-                var response = xmlhttp.responseText;
-                updateBoxesOnline(2,response);
-              }
-            }
-          }
-
-           xmlhttp.open("GET", heartbeat, true);
-           xmlhttp.send();
-      }, 2000);
-
-        // Update heartbeat status of turbine 3
-        setInterval(function(){
-          var heartbeat = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/3/heartbeat";
-          console.log('recording heartbeat: ' + heartbeat);
-          var xmlhttp = new XMLHttpRequest();
-          xmlhttp.onreadystatechange = function() {
-            if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
-               if (xmlhttp.status == 200) {
-                var response = xmlhttp.responseText;
-                updateBoxesOnline(3,response);
-              }
-            }
-          }
-
-           xmlhttp.open("GET", heartbeat, true);
-           xmlhttp.send();
-      }, 2000);
       },
 
       _getFirstSelectedTag: function(tags) {
@@ -378,74 +255,52 @@ Component will query for new data when tags or dates are changed.
       },
 
       _openWebSocket: function(tag) {
-        console.log(tag)
+        var wsUrl = this._buildWsUrl() + '/' + tag;
+        console.log('opening websocket: ' + wsUrl);
         var self = this;
-        var wsUrl;
-        var type;
-        setInterval(function(){
-          if (tag == "Compressor-2017:Turbine1Temperature")
-          {
-            wsUrl = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/1/sensors/temperature";
-            type = 1;
-          }
-          else if (tag == "Compressor-2017:Turbine2Temperature")
-          {
-            wsUrl = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/2/sensors/temperature";
-            type = 1;
-          }
-          else if (tag == "Compressor-2017:Turbine3Temperature")
-          {
-            wsUrl = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/3/sensors/temperature";
-            type = 1;
-          }
-          else if (tag == "Compressor-2017:Turbine1Voltage")
-          {
-            wsUrl = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/1/sensors/voltage";
-            type = 2;
-          }
-          else if (tag == "Compressor-2017:Turbine2Voltage")
-          {
-            wsUrl = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/2/sensors/voltage";
-            type = 2;
-          }
-          else if (tag == "Compressor-2017:Turbine3Voltage")
-          {
-            wsUrl = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/3/sensors/voltage";
-            type = 2;
-          }
-          console.log('opening websocket: ' + wsUrl);
-
-
-          var xmlhttp = new XMLHttpRequest();
-
-          xmlhttp.onreadystatechange = function() {
-            if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
-               if (xmlhttp.status == 200) {
-                var response = xmlhttp.responseText;
-
-                if (response != null) {
-                  updateBoxes(response);
-                 if (type == 1)
-                 {
-                    self.push('tsChartData', {"x0": JSON.parse(response).timestamp, "y0": JSON.parse(response).value});
-                  }
-                  else if (type == 2)
-                  {
-                    self.push('tsChartData', {"x0": JSON.parse(response).timestamp, "y0": JSON.parse(response).value});
-                  }
-                } else {
-                  updateBoxesError(tag);
-                }
-              }
+        if (this.socket && this.socket.readyState !== WebSocket.CLOSED) {
+          this.socket.close();
+        }
+        this.$.chartMessage.innerText="Waiting for live data...";
+        try {
+          this.socket = new WebSocket(wsUrl);
+          self.intervalId = setInterval(function() {
+            if (self.socket.readyState === WebSocket.OPEN) {
+              self.socket.send('ping'); // keep the connection alive
             }
-          }
+          }, 20000);
 
-           xmlhttp.open("GET", wsUrl, true);
-           xmlhttp.send();
+        } catch (err) {
+          console.error('Error opening web socket. ', err);
+          self.$.chartMessage.innerText="Error fetching live data.";
+          clearInterval(this.intervalId);
+        }
 
-          if (true) {
-          }
-      }, 3000);
+        if (this.socket) {
+          this.socket.onerror = function (error) {
+            console.error('WebSocket Error: ', error);
+            self.$.chartMessage.innerText="Error fetching live data.";
+          };
+
+          this.socket.onmessage = function (evt) {
+            self.$.chartMessage.innerText="";
+            // console.log('message from WebSocket: ' + evt.data);
+            if (evt.data === 'SUCCESS') {
+              return; // ignore the response from the 'ping'.
+            }
+            var rawPoint = JSON.parse(evt.data).datapoints[0];
+            if (self.tsChartData.length > 99) {
+              self.shift('tsChartData');
+            }
+            self.push('tsChartData', {"x0": rawPoint[0], "y0": rawPoint[1]});
+          };
+
+          this.socket.onclose = function (evt) {
+            // self.$.chartMessage.innerText="";
+            console.log('websocket closed. code: ' + evt.code);
+            // console.log('reason: ' + evt.reason);
+          };
+        }
       },
 
       closeWebSocket: function() {
