@@ -4,7 +4,7 @@
     "uri": "/asset/compressor-2017",
     "classificationUri": "/classification/GE_COMPRESSOR_CYLINDER",
     "assetId": "compressor-2017",
-    "description": "Reciprocating Compressor",
+    "description": "Wind Turbine",
     "filter": "group=/group/plant-richmond-refinery",
 	"isMock": true,
     "group": "/group/plant-richmond-refinery",
