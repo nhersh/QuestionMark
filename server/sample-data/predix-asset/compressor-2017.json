@@ -4,7 +4,7 @@
     "uri": "/asset/compressor-2017",
     "classificationUri": "/classification/GE_COMPRESSOR_CYLINDER",
     "assetId": "compressor-2017",
-    "description": "Wind Turbine",
+    "description": "Wind Turbine Analytics",
     "filter": "group=/group/plant-richmond-refinery",
 	"isMock": true,
     "group": "/group/plant-richmond-refinery",
