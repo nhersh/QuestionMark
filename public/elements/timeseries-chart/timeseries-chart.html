@@ -3,7 +3,7 @@
 <link rel="import" href="../../bower_components/px-vis-timeseries/px-vis-timeseries.html">
 <link rel="import" href="../../bower_components/px-card/px-card.html">
 <link rel="import" href="../../bower_components/px-rangepicker/px-rangepicker.html">
-<!-- Since this is loading asynchronously, we're not loading px-dropdown here for now. 
+<!-- Since this is loading asynchronously, we're not loading px-dropdown here for now.
       it's already loaded by rmd-view. -->
 <link rel="import" href="timeseries-chart-styles.html">
 
@@ -12,7 +12,7 @@
 <!--
 This component allows users to select timeseries tag(s) for display on a chart.
 An array of tags should be passed in.
-Component will query for new data when tags or dates are changed.  
+Component will query for new data when tags or dates are changed.
 -->
 <dom-module id="timeseries-chart">
     <template>
@@ -98,7 +98,7 @@ Component will query for new data when tags or dates are changed.
             this._tagsOrRangeChanged(this.tags, this.selectedRange);
           }
         }.bind(this));
-        
+
         this.$.tsAjaxEl.addEventListener('response', function(evt) {
           console.log('ts data', evt.detail.response);
           if (evt.detail.response.tags) {
@@ -124,7 +124,7 @@ Component will query for new data when tags or dates are changed.
         return tags[0] ? tags[0].key : null;  // default to first, if none checked.
       },
 
-      _buildSeriesConfig: function(tsTags, displayTags) {               
+      _buildSeriesConfig: function(tsTags, displayTags) {
         function getDisplayTag(tsTag) {
           var dt = {};
           for(var i=0; i<displayTags.length; i++) {
@@ -189,7 +189,7 @@ Component will query for new data when tags or dates are changed.
           if (this.liveDataMode) {
             this._showLiveSeries(this._getFirstSelectedTag(newTags.value));
             return;
-          }          
+          }
           if (newRange && newTags) {
             this._fetchTimeseriesData(newTags.base || newTags, newRange);
           }
@@ -252,52 +252,30 @@ Component will query for new data when tags or dates are changed.
       },
 
       _openWebSocket: function(tag) {
-        var wsUrl = this._buildWsUrl() + '/' + tag;
-        console.log('opening websocket: ' + wsUrl);
         var self = this;
-        if (this.socket && this.socket.readyState !== WebSocket.CLOSED) {
-          this.socket.close();
-        }
-        this.$.chartMessage.innerText="Waiting for live data...";
-        try {
-          this.socket = new WebSocket(wsUrl);
-          self.intervalId = setInterval(function() {
-            if (self.socket.readyState === WebSocket.OPEN) {
-              self.socket.send('ping'); // keep the connection alive
-            }
-          }, 20000);
+        setInterval(function(){
+          var wsUrl = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/1/sensors/temperature";
+          console.log('opening websocket: ' + wsUrl);
 
-        } catch (err) {
-          console.error('Error opening web socket. ', err);
-          self.$.chartMessage.innerText="Error fetching live data.";
-          clearInterval(this.intervalId);
-        }
 
-        if (this.socket) {
-          this.socket.onerror = function (error) {
-            console.error('WebSocket Error: ', error);
-            self.$.chartMessage.innerText="Error fetching live data.";
-          };
+          var xmlhttp = new XMLHttpRequest();
 
-          this.socket.onmessage = function (evt) {
-            self.$.chartMessage.innerText="";
-            // console.log('message from WebSocket: ' + evt.data);
-            if (evt.data === 'SUCCESS') {
-              return; // ignore the response from the 'ping'.
-            }
-            var rawPoint = JSON.parse(evt.data).datapoints[0];
-            if (self.tsChartData.length > 99) {
-              self.shift('tsChartData');
-            }
-            self.push('tsChartData', {"x0": rawPoint[0], "y0": rawPoint[1]});
-          };
+          xmlhttp.onreadystatechange = function() {
+            if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
+               if (xmlhttp.status == 200) {
+                   //document.getElementById("myDiv").innerHTML = xmlhttp.responseText;
+                   console.log(JSON.parse(xmlhttp.responseText))
+                   self.push('tsChartData', {"x0": JSON.parse(xmlhttp.responseText).timestamp, "y0": JSON.parse(xmlhttp.responseText).value});
+               }
+             }
+           }
 
-          this.socket.onclose = function (evt) {
-            // self.$.chartMessage.innerText="";
-            console.log('websocket closed. code: ' + evt.code);
-            // console.log('reason: ' + evt.reason);
-          };
-        }
+           xmlhttp.open("GET", wsUrl, true);
+           xmlhttp.send();
+
+          if (true) {
+          }
+      }, 3000);
       },
 
       closeWebSocket: function() {
@@ -332,7 +310,7 @@ Component will query for new data when tags or dates are changed.
       },
 
       _setModeLabel: function(liveMode) {
-        this.modeLabel = liveMode ? "Live Data" : "Historical Data";
+        this.modeLabel = liveMode ? "Live Data - Turbine 1" : "Historical Data";
       }
 
     });
