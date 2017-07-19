@@ -19,7 +19,7 @@
 		"alertStatus": false,
 		"alertStatusType": null,
 		"currentValue": 7.2320851255672505,
-		"unit": "psi",
+		"unit": null,
 		"lastTagReading": 1489786617310,
 		"asset": "Bently Compressor",
 		"assetUri": "/asset/compressor-2015"
