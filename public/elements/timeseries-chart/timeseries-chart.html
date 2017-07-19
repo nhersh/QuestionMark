@@ -1,4 +1,4 @@
-<link rel="import" href="../../bower_components/polymer/polymer.html">
+  <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../../bower_components/px-vis-timeseries/px-vis-timeseries.html">
 <link rel="import" href="../../bower_components/px-card/px-card.html">
@@ -46,6 +46,60 @@ Component will query for new data when tags or dates are changed.
       <iron-ajax id="tsAjaxEl" content-type="application/json"></iron-ajax>
     </template>
     <script>
+      updateBoxes = function(data) {
+        console.log("I'm updating this box");
+        var rawData = JSON.parse(data);
+
+        if (rawData.turbine_id == 1) {
+            var c = document.getElementById("turbine1rectangle");
+            document.getElementById("turbine1heartbeat").innerHTML = "ONLINE";
+        } else if (rawData.turbine_id == 2) {
+            var c = document.getElementById("turbine2rectangle");
+            document.getElementById("turbine2heartbeat").innerHTML = "ONLINE";
+        } else {
+            var c = document.getElementById("turbine3rectangle");
+            document.getElementById("turbine3heartbeat").innerHTML = "ONLINE";
+        }
+      },
+
+      updateBoxesOnline = function(id, data) {
+        console.log("I'm updating this box");
+        var rawData = JSON.parse(data);
+        if (id == 1) {
+            var c = document.getElementById("turbine1rectangle");
+            document.getElementById("turbine1heartbeat").innerHTML = ((data==null) ? "OFFLINE" : "ONLINE");
+        } else if (id == 2) {
+            var c = document.getElementById("turbine2rectangle");
+            document.getElementById("turbine2heartbeat").innerHTML = ((data==null) ? "OFFLINE" : "ONLINE");
+        } else {
+            var c = document.getElementById("turbine3rectangle");
+            document.getElementById("turbine3heartbeat").innerHTML = ((data==null) ? "OFFLINE" : "ONLINE");
+        }
+      },
+
+      updateBoxesError = function(tag) {
+        if ( (tag == "Compressor-2017:Turbine1Temperature") || 
+          ("Compressor-2017:Turbine1Voltage") || 
+          ("Compressor-2017:Turbine1Voltage")) { // IF Turbine 1 is down
+          window.alert("Turbine 1 needs immediate attention!");
+          var c = document.getElementById("turbine1rectangle");
+          document.getElementById("turbine1heartbeat").innerHTML = "OFFLINE";
+        } else if ( (tag == "Compressor-2017:Turbine2Temperature") || 
+          ("Compressor-2017:Turbine2Voltage") || 
+          ("Compressor-2017:Turbine2Voltage")) { // IF Turbine 2 is down
+          window.alert("Turbine 1 needs immediate attention!");
+          var c = document.getElementById("turbine2rectangle");
+          document.getElementById("turbine2heartbeat").innerHTML = "OFFLINE";
+        } else { // IF Turbine 3 is down
+          window.alert("Turbine 1 needs immediate attention!");
+          var c = document.getElementById("turbine3rectangle");
+          document.getElementById("turbine3heartbeat").innerHTML = "OFFLINE";
+        }
+        var ctx=c.getContext("2d");
+        ctx.fillStyle = "#FF0000";
+        ctx.fillRect(20,20,150, 100);
+      },
+
     Polymer({
       is: 'timeseries-chart',
       properties: {
@@ -112,6 +166,60 @@ Component will query for new data when tags or dates are changed.
             this._showLiveSeries(evt.detail.key);
           }
         }.bind(this));
+
+        // Update heartbeat status of turbine 1
+        setInterval(function(){
+          var heartbeat = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/1/heartbeat";
+          console.log('recording heartbeat: ' + heartbeat);
+          var xmlhttp = new XMLHttpRequest();
+          xmlhttp.onreadystatechange = function() {
+            if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
+               if (xmlhttp.status == 200) {
+                var response = xmlhttp.responseText;
+                updateBoxesOnline(1,response);
+              }
+            }
+          }
+
+           xmlhttp.open("GET", heartbeat, true);
+           xmlhttp.send();
+      }, 2000);
+
+        // Update heartbeat status of turbine 2
+        setInterval(function(){
+          var heartbeat = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/2/heartbeat";
+          console.log('recording heartbeat: ' + heartbeat);
+          var xmlhttp = new XMLHttpRequest();
+          xmlhttp.onreadystatechange = function() {
+            if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
+               if (xmlhttp.status == 200) {
+                var response = xmlhttp.responseText;
+                updateBoxesOnline(2,response);
+              }
+            }
+          }
+
+           xmlhttp.open("GET", heartbeat, true);
+           xmlhttp.send();
+      }, 2000);
+
+        // Update heartbeat status of turbine 3
+        setInterval(function(){
+          var heartbeat = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/3/heartbeat";
+          console.log('recording heartbeat: ' + heartbeat);
+          var xmlhttp = new XMLHttpRequest();
+          xmlhttp.onreadystatechange = function() {
+            if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
+               if (xmlhttp.status == 200) {
+                var response = xmlhttp.responseText;
+                updateBoxesOnline(3,response);
+              }
+            }
+          }
+
+           xmlhttp.open("GET", heartbeat, true);
+           xmlhttp.send();
+      }, 2000);
       },
 
       _getFirstSelectedTag: function(tags) {
@@ -295,17 +403,24 @@ Component will query for new data when tags or dates are changed.
           xmlhttp.onreadystatechange = function() {
             if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
                if (xmlhttp.status == 200) {
+                var response = xmlhttp.responseText;
+                
+                if (response != null) {
+                  updateBoxes(response);
                  if (type == 1)
                  {
-                    self.push('tsChartData', {"x0": JSON.parse(xmlhttp.responseText).timestamp, "y0": JSON.parse(xmlhttp.responseText).value});
+                    self.push('tsChartData', {"x0": JSON.parse(response).timestamp, "y0": JSON.parse(response).value});
                   }
                   else if (type == 2)
                   {
-                    self.push('tsChartData', {"x0": JSON.parse(xmlhttp.responseText).timestamp, "y0": JSON.parse(xmlhttp.responseText).value});
+                    self.push('tsChartData', {"x0": JSON.parse(response).timestamp, "y0": JSON.parse(response).value});
                   }
-               }
-             }
-           }
+                } else {
+                  updateBoxesError(tag);
+                }
+              }
+            }
+          }
 
            xmlhttp.open("GET", wsUrl, true);
            xmlhttp.send();
