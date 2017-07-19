@@ -5,12 +5,12 @@
 
 <dom-module id="asset-browser">
     <template>
-        <px-context-browser id="assetBrowser" 
+        <px-context-browser id="assetBrowser"
           opened-item-name="Select Asset"
-          browser-context="{{assetModel}}">Asset Monitoring</px-context-browser>
+          browser-context="{{assetModel}}">Turbine Monitoring</px-context-browser>
         <!-- Fetch the whole asset model at once, using these two queries.
             (Our asset model has only groups and assets.)
-            This way, we can pre-select an asset deep in the tree. 
+            This way, we can pre-select an asset deep in the tree.
             This component assumes that every entity has a "parent" or "group" attribute.
             -->
         <iron-ajax id="groupAjaxEl" url="{{assetGroupQueryUrl}}"></iron-ajax>
@@ -26,7 +26,7 @@
         },
         openedAsset: {
           type: Object,
-          notify: true        
+          notify: true
         },
         assetQueryUrl: {
           type: String
