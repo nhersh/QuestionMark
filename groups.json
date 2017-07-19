@@ -1,0 +1,34 @@
+[
+  {
+    "filter": "parent=/group/root",
+    "parent": "/group/root",
+    "description": "Turbine Portfolio",
+    "uri": "/group/enterprise-predix",
+    "level": "enterprise",
+    "name": "Predix Energy"
+  },
+  {
+    "filter": "parent=/group/enterprise-predix",
+    "parent": "/group/enterprise-predix",
+    "description": "Wind Farm A",
+    "uri": "/group/plant-richmond-refinery",
+    "level": "plant",
+    "name": "Turbines Group"
+  },
+    {
+    "filter": "parent=/group/enterprise-predix",
+    "parent": "/group/enterprise-predix",
+    "description": "Wind Farm B",
+    "uri": "/group/plant-richmond-refinery",
+    "level": "plant",
+    "name": "Turbines Group"
+  },
+    {
+    "filter": "parent=/group/enterprise-predix",
+    "parent": "/group/enterprise-predix",
+    "description": "Wind Farm C",
+    "uri": "/group/plant-richmond-refinery",
+    "level": "plant",
+    "name": "Turbines Group"
+  }
+]
