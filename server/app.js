@@ -185,7 +185,7 @@ app.get('/favicon.ico', function (req, res) {
 });
 
 app.get('/config', function(req, res) {
-  let title = "Question Mark?";
+  let title = "Question Mark? Analytics";
   if (config.isAssetConfigured()) {
     title = "RMD Reference App";
   }

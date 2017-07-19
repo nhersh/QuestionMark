@@ -4,14 +4,14 @@
     "uri": "/asset/compressor-2017",
     "classificationUri": "/classification/GE_COMPRESSOR_CYLINDER",
     "assetId": "compressor-2017",
-    "description": "Reciprocating Compressor",
+    "description": "Turbine",
     "filter": "group=/group/plant-richmond-refinery",
 	"isMock": true,
     "group": "/group/plant-richmond-refinery",
     "assetTag": {
-      "crank-frame-compressionratio": {
+      "turbine-temperature": {
         "complexType": "AssetTag",
-        "label": "Compression Ratio",
+        "label": "Temperature",
         "tagUri": "/tag/crank-frame-compressionratio",
         "hiAlarmThreshold": 3,
         "loAlarmThreshold": 2.5,
@@ -28,7 +28,7 @@
       },
       "crank-frame-dischargepressure": {
         "complexType": "AssetTag",
-        "label": "Discharge Pressure",
+        "label": "Voltage",
         "tagUri": "/tag/crank-frame-dischargepressure",
         "hiAlarmThreshold": 23,
         "loAlarmThreshold": 0,
@@ -43,70 +43,6 @@
           "controllerUri": "/asset/Bently.Nevada.3500.Rack1"
         },
         "alertStatusUri": "/asset/compressor-2017.alert-status.crank-frame-discharge-pressure"
-      },
-      "crank-frame-suctionpressure": {
-        "complexType": "AssetTag",
-        "label": "Suction Pressure",
-        "tagUri": "/tag/crank-frame-suctionpressure",
-        "hiAlarmThreshold": 0.21,
-        "loAlarmThreshold": 0,
-        "timeseriesDatasource": {
-          "complexType": "TimeseriesDatasource",
-          "tag": "Compressor-2017:SuctionPressure"
-        },
-        "edgeDatasource": {
-          "complexType": "EdgeDatasource",
-          "nodeName": "Compressor-2017:SuctionPressure",
-          "controllerUri": "/asset/Bently.Nevada.3500.Rack1"
-        }
-      },
-      "crank-frame-maxpressure": {
-        "complexType": "AssetTag",
-        "label": "Max Pressure",
-        "tagUri": "/tag/crank-frame-maxpressure",
-        "hiAlarmThreshold": 26,
-        "loAlarmThreshold": 22,
-        "timeseriesDatasource": {
-          "complexType": "TimeseriesDatasource",
-          "tag": "Compressor-2017:MaximumPressure"
-        },
-        "edgeDatasource": {
-          "complexType": "EdgeDatasource",
-          "nodeName": "Compressor-2017:MaximumPressure",
-          "controllerUri": "/asset/Bently.Nevada.3500.Rack1"
-        }
-      },
-      "crank-frame-velocity": {
-        "complexType": "AssetTag",
-        "label": "Velocity",
-        "tagUri": "/tag/crank-frame-velocity",
-        "hiAlarmThreshold": 0.07,
-        "loAlarmThreshold": 0,
-        "timeseriesDatasource": {
-          "complexType": "TimeseriesDatasource",
-          "tag": "Compressor-2017:Velocity"
-        },
-        "edgeDatasource": {
-          "complexType": "EdgeDatasource",
-          "nodeName": "Compressor-2017:Velocity",
-          "controllerUri": "/asset/Bently.Nevada.3500.Rack1"
-        }
-      },
-      "crank-frame-temperature": {
-        "complexType": "AssetTag",
-        "label": "Temperature",
-        "tagUri": "/tag/crank-frame-temperature",
-        "hiAlarmThreshold": 80,
-        "loAlarmThreshold": 65,
-        "timeseriesDatasource": {
-          "complexType": "TimeseriesDatasource",
-          "tag": "Compressor-2017:Temperature"
-        },
-        "edgeDatasource": {
-          "complexType": "EdgeDatasource",
-          "nodeName": "Compressor-2017:Temperature",
-          "controllerUri": "/asset/Bently.Nevada.3500.Rack1"
-        }
       }
     },
     "attributes": {
@@ -123,7 +59,7 @@
         "type": "string",
         "enumeration": [],
         "value": [
-          "crank-frame-velocity",
+          "turbine-temperature",
           "crank-frame-compressionratio"
         ]
       }
