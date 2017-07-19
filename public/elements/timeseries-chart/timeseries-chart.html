@@ -6,9 +6,9 @@
 <!-- Since this is loading asynchronously, we're not loading px-dropdown here for now.
       it's already loaded by rmd-view. -->
 <link rel="import" href="timeseries-chart-styles.html">
- 
+
 <script src="../../bower_components/moment/min/moment.min.js"></script>
- 
+
 <!--
 This component allows users to select timeseries tag(s) for display on a chart.
 An array of tags should be passed in.
@@ -26,7 +26,7 @@ Component will query for new data when tags or dates are changed.
               </px-dropdown>
             </div>
           </div>
-          <div class="u-1/4-desk u-1/1-palm"><button id="toggleChartBtn" class="btn">Show Live Data</button></div>
+          <div class="u-1/4-desk u-1/1-palm"></div>
           <div class="u-1/2-desk u-1/1-palm">
             <px-rangepicker id="tsRangepicker" range="{{selectedRange}}" hidden$="{{liveDataMode}}"></px-rangepicker>
             <div id="chartMessage" class="u-pt--" hidden$="{{!liveDataMode}}"></div>
@@ -72,7 +72,7 @@ Component will query for new data when tags or dates are changed.
         },
         liveDataMode: {
           type: Boolean,
-          value: false
+          value: true
         },
         modeLabel: {
           value: "Historical Data"
@@ -82,10 +82,10 @@ Component will query for new data when tags or dates are changed.
         }
       },
       observers: ['_tagsOrRangeChanged(tags.*, selectedRange)', '_setModeLabel(liveDataMode)'],
- 
+
       ready: function() {
         this.selectedRange = this._getDefaultRange(1);
- 
+
         this.$.toggleChartBtn.addEventListener('tap', function(evt) {
           this.liveDataMode = !this.liveDataMode;
           if (this.liveDataMode) {
@@ -98,14 +98,14 @@ Component will query for new data when tags or dates are changed.
             this._tagsOrRangeChanged(this.tags, this.selectedRange);
           }
         }.bind(this));
- 
+
         this.$.tsAjaxEl.addEventListener('response', function(evt) {
           console.log('ts data', evt.detail.response);
           if (evt.detail.response.tags) {
             this._formatDataForChart(evt.detail.response.tags);
           }
         }.bind(this));
- 
+
         this.$.tagDropdown.addEventListener('px-dropdown-value-changed', function(evt) {
           if (evt.detail.key && evt.detail.key !== "") {
             console.log('new single tag selected:', evt.detail);
@@ -113,7 +113,7 @@ Component will query for new data when tags or dates are changed.
           }
         }.bind(this));
       },
- 
+
       _getFirstSelectedTag: function(tags) {
         for (var i = 0; i < tags.length; i++) {
           var t = tags[i];
@@ -123,7 +123,7 @@ Component will query for new data when tags or dates are changed.
         }
         return tags[0] ? tags[0].key : null;  // default to first, if none checked.
       },
- 
+
       _buildSeriesConfig: function(tsTags, displayTags) {
         function getDisplayTag(tsTag) {
           var dt = {};
@@ -136,7 +136,7 @@ Component will query for new data when tags or dates are changed.
           // console.log('display tag', dt);
           return dt;
         }
- 
+
         var config = {};
         tsTags.forEach(function(tag, index) {
           var displayTag = getDisplayTag(tag);
@@ -161,7 +161,7 @@ Component will query for new data when tags or dates are changed.
         console.log('series config', config);
         return config;
       },
- 
+
       _formatDataForChart: function(tags) {
         var chartData = [], seriesConfig = {};
         tags.forEach(function(tag, i) {
@@ -182,7 +182,7 @@ Component will query for new data when tags or dates are changed.
         this.tsSeriesConfig = this._buildSeriesConfig(tags, this.tags);
         this.tsChartData = chartData;
       },
- 
+
       _tagsOrRangeChanged: function(newTags, newRange) {
         // console.log('_tagsOrRangeChanged', newTags, newRange);
           this.debounce('fetch', function() {
@@ -195,7 +195,7 @@ Component will query for new data when tags or dates are changed.
           }
         }, 100);
       },
- 
+
       // Expects an array of objects from px-dropdown, and a range object from px-rangepicker
       // [{key: "tag1", val: "Tag 1"}, {key: "tag2", val: "Tag 2", checked: true}]
       // {"from":"2016-01-01T00:00:00.000Z","to":"2016-07-01T11:00:00.000Z"}
@@ -236,13 +236,13 @@ Component will query for new data when tags or dates are changed.
         this.$.tsAjaxEl.body = query;
         this.$.tsAjaxEl.generateRequest();
       },
- 
+
       _getDefaultRange: function(weeks) {
         var from = moment().subtract(weeks, 'week'),
           to = moment();
         return {"from":from.toISOString(),"to":to.toISOString()};
       },
- 
+
       _showLiveSeries: function(tag) {
         this.tsSeriesConfig = {};
         this.tsSeriesConfig = this._buildSeriesConfig([{name: tag}], this.tags);
@@ -250,34 +250,106 @@ Component will query for new data when tags or dates are changed.
         this.$.tsChart.notifyResize();
         this._openWebSocket(tag);
       },
- 
+
       _openWebSocket: function(tag) {
+        console.log(tag)
         var self = this;
+        var wsUrl;
+        var type;
         setInterval(function(){
-          var wsUrl = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/1/sensors/temperature";
+          if (tag == "Compressor-2017:Turbine1Temperature")
+          {
+            wsUrl = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/1/sensors/temperature";
+            type = 1;
+          }
+          else if (tag == "Compressor-2017:Turbine2Temperature")
+          {
+            wsUrl = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/2/sensors/temperature";
+            type = 1;
+          }
+          else if (tag == "Compressor-2017:Turbine3Temperature")
+          {
+            wsUrl = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/3/sensors/temperature";
+            type = 1;
+          }
+          else if (tag == "Compressor-2017:Turbine1Voltage")
+          {
+            wsUrl = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/1/sensors/voltage";
+            type = 2;
+          }
+          else if (tag == "Compressor-2017:Turbine2Voltage")
+          {
+            wsUrl = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/2/sensors/voltage";
+            type = 2;
+          }
+          else if (tag == "Compressor-2017:Turbine3Voltage")
+          {
+            wsUrl = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/3/sensors/voltage";
+            type = 2;
+          }
           console.log('opening websocket: ' + wsUrl);
- 
- 
+
+
           var xmlhttp = new XMLHttpRequest();
- 
+
           xmlhttp.onreadystatechange = function() {
             if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
                if (xmlhttp.status == 200) {
-                   //document.getElementById("myDiv").innerHTML = xmlhttp.responseText;
-                   console.log(JSON.parse(xmlhttp.responseText))
-                   self.push('tsChartData', {"x0": JSON.parse(xmlhttp.responseText).timestamp, "y0": JSON.parse(xmlhttp.responseText).value});
+                 if (type == 1)
+                 {
+                    self.push('tsChartData', {"x0": JSON.parse(xmlhttp.responseText).timestamp, "y0": JSON.parse(xmlhttp.responseText).value});
+                  }
+                  else if (type == 2)
+                  {
+                    self.push('tsChartData', {"x0": JSON.parse(xmlhttp.responseText).timestamp, "y0": JSON.parse(xmlhttp.responseText).value});
+                  }
                }
              }
            }
- 
+
            xmlhttp.open("GET", wsUrl, true);
            xmlhttp.send();
- 
+
           if (true) {
           }
       }, 3000);
       },
- 
+
       closeWebSocket: function() {
         if (this.socket && this.socket.readyState !== WebSocket.CLOSED) {
-          this.socket.close(
+          this.socket.close();
+        }
+        clearInterval(this.intervalId);
+      },
+
+      // if this component is hidden, close the web socket.
+      attributeChanged: function(name, type) {
+        // console.log('attribute changed', name, type);
+        this.debounce('hidden', function() {
+          if (name === 'hidden' && this.getAttribute(name) === '') {
+            console.log('component hidden.');
+            this.closeWebSocket();
+          }
+        }, 500);
+      },
+
+      _buildWsUrl: function() {
+        console.log('_buildWsUrl', this.wsUrl);
+        if (this.wsUrl && this.wsUrl.indexOf('wss://') === 0) {
+          // looks like there's a real web socket server running in the cloud.
+          return this.wsUrl + '/livestream';
+        } else if ('http:' === window.location.protocol) {
+          // assume we're running locally with mock web socket server
+          return 'ws://localhost:5000' + this.wsUrl;
+        } else { // running in cloud, using mock web socket server
+          return 'wss://' + window.location.host + this.wsUrl;
+        }
+      },
+
+      _setModeLabel: function(liveMode) {
+        this.modeLabel = liveMode ? "Live Data" : "Historical Data";
+      }
+
+    });
+    </script>
+</dom-module>
