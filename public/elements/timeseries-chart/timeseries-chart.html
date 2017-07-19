@@ -26,7 +26,7 @@ Component will query for new data when tags or dates are changed.
               </px-dropdown>
             </div>
           </div>
-          <div class="u-1/4-desk u-1/1-palm"><button id="toggleChartBtn" class="btn">Show Live Data</button></div>
+          <div class="u-1/4-desk u-1/1-palm"></div>
           <div class="u-1/2-desk u-1/1-palm">
             <px-rangepicker id="tsRangepicker" range="{{selectedRange}}" hidden$="{{liveDataMode}}"></px-rangepicker>
             <div id="chartMessage" class="u-pt--" hidden$="{{!liveDataMode}}"></div>
@@ -72,7 +72,7 @@ Component will query for new data when tags or dates are changed.
         },
         liveDataMode: {
           type: Boolean,
-          value: false
+          value: true
         },
         modeLabel: {
           value: "Historical Data"
@@ -252,9 +252,41 @@ Component will query for new data when tags or dates are changed.
       },
 
       _openWebSocket: function(tag) {
+        console.log(tag)
         var self = this;
+        var wsUrl;
+        var type;
         setInterval(function(){
-          var wsUrl = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/1/sensors/temperature";
+          if (tag == "Compressor-2017:Turbine1Temperature")
+          {
+            wsUrl = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/1/sensors/temperature";
+            type = 1;
+          }
+          else if (tag == "Compressor-2017:Turbine2Temperature")
+          {
+            wsUrl = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/2/sensors/temperature";
+            type = 1;
+          }
+          else if (tag == "Compressor-2017:Turbine3Temperature")
+          {
+            wsUrl = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/3/sensors/temperature";
+            type = 1;
+          }
+          else if (tag == "Compressor-2017:Turbine1Voltage")
+          {
+            wsUrl = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/1/sensors/voltage";
+            type = 2;
+          }
+          else if (tag == "Compressor-2017:Turbine2Voltage")
+          {
+            wsUrl = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/2/sensors/voltage";
+            type = 2;
+          }
+          else if (tag == "Compressor-2017:Turbine3Voltage")
+          {
+            wsUrl = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/3/sensors/voltage";
+            type = 2;
+          }
           console.log('opening websocket: ' + wsUrl);
 
 
@@ -263,9 +295,14 @@ Component will query for new data when tags or dates are changed.
           xmlhttp.onreadystatechange = function() {
             if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
                if (xmlhttp.status == 200) {
-                   //document.getElementById("myDiv").innerHTML = xmlhttp.responseText;
-                   console.log(JSON.parse(xmlhttp.responseText))
-                   self.push('tsChartData', {"x0": JSON.parse(xmlhttp.responseText).timestamp, "y0": JSON.parse(xmlhttp.responseText).value});
+                 if (type == 1)
+                 {
+                    self.push('tsChartData', {"x0": JSON.parse(xmlhttp.responseText).timestamp, "y0": JSON.parse(xmlhttp.responseText).value});
+                  }
+                  else if (type == 2)
+                  {
+                    self.push('tsChartData', {"x0": JSON.parse(xmlhttp.responseText).timestamp, "y0": JSON.parse(xmlhttp.responseText).value});
+                  }
                }
              }
            }
@@ -310,7 +347,7 @@ Component will query for new data when tags or dates are changed.
       },
 
       _setModeLabel: function(liveMode) {
-        this.modeLabel = liveMode ? "Live Data - Turbine 1" : "Historical Data";
+        this.modeLabel = liveMode ? "Live Data" : "Historical Data";
       }
 
     });
