@@ -62,18 +62,27 @@ Component will query for new data when tags or dates are changed.
         }
       },
 
-      updateBoxesOnline = function(id, data) {
-        console.log("I'm updating this box");
-        var rawData = JSON.parse(data);
+      updateBoxesHeartbeat = function(id, data) {
+        console.log("I'm updating box " + id);
+        var str = "turbine" + id;
+        status = JSON.parse(data).status;
+
         if (id == 1) {
-            var c = document.getElementById("turbine1rectangle");
-            document.getElementById("turbine1heartbeat").innerHTML = ((data==null) ? "OFFLINE" : "ONLINE");
+            var c = document.getElementById(str + "rectangle");
+            document.getElementById(str + "heartbeat").innerHTML = status;
         } else if (id == 2) {
-            var c = document.getElementById("turbine2rectangle");
-            document.getElementById("turbine2heartbeat").innerHTML = ((data==null) ? "OFFLINE" : "ONLINE");
+            var c = document.getElementById(str + "rectangle");
+            document.getElementById(str + "heartbeat").innerHTML = status;
         } else {
-            var c = document.getElementById("turbine3rectangle");
-            document.getElementById("turbine3heartbeat").innerHTML = ((data==null) ? "OFFLINE" : "ONLINE");
+            var c = document.getElementById(str + "rectangle");
+            document.getElementById(str + "heartbeat").innerHTML = status;
+        }
+
+        if (document.getElementById(str + "heartbeat").innerHTML == "OFFLINE") {
+          window.alert("Turbine " + id + " needs immediate attention!");
+          c.style.backgroundColor = "#FF0000";
+        } else {
+          c.style.backgroundColor = "#4cbb17";
         }
       },
 
@@ -95,9 +104,7 @@ Component will query for new data when tags or dates are changed.
           var c = document.getElementById("turbine3rectangle");
           document.getElementById("turbine3heartbeat").innerHTML = "OFFLINE";
         }
-        var ctx=c.getContext("2d");
-        ctx.fillStyle = "#FF0000";
-        ctx.fillRect(20,20,150, 100);
+        c.style.backgroundColor = "#FF0000";
       },
 
     Polymer({
@@ -167,59 +174,59 @@ Component will query for new data when tags or dates are changed.
           }
         }.bind(this));
 
-        // Update heartbeat status of turbine 1
-        setInterval(function(){
-          var heartbeat = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/1/heartbeat";
-          console.log('recording heartbeat: ' + heartbeat);
-          var xmlhttp = new XMLHttpRequest();
-          xmlhttp.onreadystatechange = function() {
-            if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
-               if (xmlhttp.status == 200) {
-                var response = xmlhttp.responseText;
-                updateBoxesOnline(1,response);
+          // Update heartbeat status of turbine 1
+          setInterval(function(){
+            var heartbeat = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/1/heartbeat";
+            console.log('recording heartbeat: ' + heartbeat);
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.onreadystatechange = function() {
+              if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
+                 if (xmlhttp.status == 200) {
+                  var response = xmlhttp.responseText;
+                  updateBoxesHeartbeat(1,response);
+                }
               }
             }
-          }
 
-           xmlhttp.open("GET", heartbeat, true);
-           xmlhttp.send();
-      }, 2000);
+             xmlhttp.open("GET", heartbeat, true);
+             xmlhttp.send();
+        }, 2000);
 
-        // Update heartbeat status of turbine 2
-        setInterval(function(){
-          var heartbeat = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/2/heartbeat";
-          console.log('recording heartbeat: ' + heartbeat);
-          var xmlhttp = new XMLHttpRequest();
-          xmlhttp.onreadystatechange = function() {
-            if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
-               if (xmlhttp.status == 200) {
-                var response = xmlhttp.responseText;
-                updateBoxesOnline(2,response);
+          // Update heartbeat status of turbine 2
+          setInterval(function(){
+            var heartbeat = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/2/heartbeat";
+            console.log('recording heartbeat: ' + heartbeat);
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.onreadystatechange = function() {
+              if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
+                 if (xmlhttp.status == 200) {
+                  var response = xmlhttp.responseText;
+                  updateBoxesHeartbeat(2,response);
+                }
               }
             }
-          }
 
-           xmlhttp.open("GET", heartbeat, true);
-           xmlhttp.send();
-      }, 2000);
+             xmlhttp.open("GET", heartbeat, true);
+             xmlhttp.send();
+        }, 2000);
 
-        // Update heartbeat status of turbine 3
-        setInterval(function(){
-          var heartbeat = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/3/heartbeat";
-          console.log('recording heartbeat: ' + heartbeat);
-          var xmlhttp = new XMLHttpRequest();
-          xmlhttp.onreadystatechange = function() {
-            if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
-               if (xmlhttp.status == 200) {
-                var response = xmlhttp.responseText;
-                updateBoxesOnline(3,response);
+          // Update heartbeat status of turbine 3
+          setInterval(function(){
+            var heartbeat = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/3/heartbeat";
+            console.log('recording heartbeat: ' + heartbeat);
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.onreadystatechange = function() {
+              if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
+                 if (xmlhttp.status == 200) {
+                  var response = xmlhttp.responseText;
+                  updateBoxesHeartbeat(3,response);
+                }
               }
             }
-          }
 
-           xmlhttp.open("GET", heartbeat, true);
-           xmlhttp.send();
-      }, 2000);
+             xmlhttp.open("GET", heartbeat, true);
+             xmlhttp.send();
+        }, 2000);
       },
 
       _getFirstSelectedTag: function(tags) {
