@@ -4,14 +4,14 @@
 <link rel="import" href="../../bower_components/px-dropdown/px-dropdown-content.html">
 <link rel="import" href="../asset-browser/asset-browser.html">
 <link rel="import" href="../seed-table/seed-table.html">
-<link rel="import" href="../kpi-bar/kpi-bar.html">
 
 <dom-module id="rmd-view">
   <style>
   :host {
-    --iron-icon-width: 16px;
+   --iron-icon-width: 16px;
     --iron-icon-height: 16px;
-  }
+  },
+
   </style>
   <template>
     <asset-browser id="assetBrowser"
@@ -36,6 +36,29 @@
     <seed-table id="seedTable" rmd-data="{{rmdTableData}}"></seed-table>
     <iron-ajax id="datatableAjaxEl"></iron-ajax>
 
+      <div style="margin-bottom: 5px; margin-top: 5px">
+          <div id="turbine1rectangle" style=" float: left; width: 300px; height: 150px; background-color: darkblue; margin-left: 10px; margin-right: 90px; border-color: black; border-radius: 4px ";>
+              <h3 id="turbine1title" style="margin-bottom: -10px ; font-family: GE Inspira Sans;  width: 300px; text-align-last: center">Turbine 1</h3>
+              <h4 id="turbine1heartbeat" style="margin-bottom: -10px; color: black font-family: GE Inspira Sans;  width: 300px; text-align-last: center">Placeholder heartbeat text </h4>
+              <h4 id="turbine1temperature" style="margin-bottom: -10px; color: black font-family: GE Inspira Sans;  width: 300px; text-align-last: center">Placeholder temperature text </h4>
+              <h4 id="turbine1voltage" style="color: black font-family: GE Inspira Sans;  width: 300px; text-align-last: center">Placeholder voltage text </h4>
+          </div>
+
+          <div id="turbine2rectangle" style=" display: inline-block; width: 300px; height: 150px; background-color: darkblue; padding-right: 10px; border-color: black; border-radius: 4px ";>
+             <h3 id="turbine2title" style="margin-bottom: -10px ; font-family: GE Inspira Sans;  width: 300px; text-align-last: center">Turbine 2</h3>
+              <h4 id="turbine2heartbeat" style="margin-bottom: -10px; color: black font-family: GE Inspira Sans;  width: 300px; text-align-last: center">Placeholder heartbeat text </h4>
+              <h4 id="turbine2temperature" style="margin-bottom: -10px; color: black font-family: GE Inspira Sans;  width: 300px; text-align-last: center">Placeholder temperature text </h4>
+              <h4 id="turbine2voltage" style="color: black font-family: GE Inspira Sans;  width: 300px; text-align-last: center">Placeholder voltage text </h4>
+        </div>
+
+          <div id="turbine3rectangle" style="float: right; width: 300px; height: 150px; background-color: darkblue; margin-right: 10px; border-color: black; border-radius: 4px ";>
+               <h3 id="turbine3title" style="margin-bottom: -10px ; font-family: GE Inspira Sans;  width: 300px; text-align-last: center">Turbine 3</h3>
+              <h4 id="turbine3heartbeat" style="margin-bottom: -10px; color: black font-family: GE Inspira Sans;  width: 300px; text-align-last: center">Placeholder heartbeat text </h4>
+              <h4 id="turbine3temperature" style="margin-bottom: -10px; color: black font-family: GE Inspira Sans;  width: 300px; text-align-last: center">Placeholder temperature text </h4>
+              <h4 id="turbine3voltage" style="color: black font-family: GE Inspira Sans;  width: 300px; text-align-last: center">Placeholder voltage text </h4>
+          </div>
+      </div>
+
     <timeseries-chart id="tsChart" ws-url="[[wsUrl]]"
       tags="{{displayTags}}" hidden$="{{!showTimeseriesChart}}"></timeseries-chart>
 
@@ -51,6 +74,7 @@
       style="text-align: center; line-height: 26px; width: 28px; height: 28px; position: absolute; top: 18px; right: 20px; border: 1px solid #999; border-radius: 4px;">
       <iron-icon icon="fa:fa-refresh" style="margin-left: 2px; margin-top: 1px"></iron-icon>
     </div>
+
   </template>
   <script>
     Polymer({
@@ -133,18 +157,6 @@
         this.refreshTimerInterval = 0;
         this.wsUrl = document.querySelector('#rmdPxView').elementData.wsUrl;
 
-        this.$.kpiBarAjaxEl.addEventListener('response', function(evt) {
-          var data = evt.detail.response;
-          if (Array.isArray(data)) {
-            data = data[0];
-          }
-          var kpis = data.kpis, overall = data.overall;
-          this.kpiDatapoints = kpis;
-          this.kpiOverallLabel = overall.title;
-          this.kpiOverallValue = overall.percentage;
-          this.kpiOverallMax ="100";
-          this.kpiBarWrapperState = 'kpi-bar-wrapper-datareceived';
-        }.bind(this));
 
         this.$.datatableAjaxEl.addEventListener('response', function(evt) {
           this.rmdTableData = evt.detail.response;
