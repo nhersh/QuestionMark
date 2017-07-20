@@ -27,7 +27,7 @@ Component will query for new data when tags or dates are changed.
               </px-dropdown>
             </div>
           </div>
-          <div class="u-1/4-desk u-1/1-palm"><button id="toggleChartBtn" class="btn">Show Live Data</button><button id="toggleDownloadBtn" class="btn">Download Data</button></div>
+          <div class="u-1/4-desk u-1/1-palm"><button id="toggleChartBtn" class="btn">Show Live Data</button><button id="toggleDownloadBtn" class="btn" style="padding-left: 12px;">Download Data</button></div>
           <div class="u-1/2-desk u-1/1-palm">
             <px-rangepicker id="tsRangepicker" range="{{selectedRange}}" hidden$="{{liveDataMode}}"></px-rangepicker>
             <div id="chartMessage" class="u-pt--" hidden$="{{!liveDataMode}}"></div>
@@ -45,11 +45,47 @@ Component will query for new data when tags or dates are changed.
         </div>
       </px-card>
       <iron-ajax id="tsAjaxEl" content-type="application/json"></iron-ajax>
+      <px-card style="padding-bottom: 10px;">
+        <div class='wrapper'>
+          <form id='toleranceForm'>
+            <div class='form-uname'>
+              <br>
+              <lable id='tempMinLable' for='tempMinField'>Set temperature minimum:</lable>
+              <input id='tempMinField' type='number' value="60"></input>
+              <lable id='tempMaxLable' for='tempMaxField'>Set temperature maximum:</lable>
+              <input id='tempMaxField' type='number' value="90"></input>
+              <br><br>
+              <lable id='voltageMinLable' for='voltageMinField'>Set voltage minimum:</lable>
+              <input id='voltageMinField' type='number' value=".4"></input>
+              <lable id='voltageMaxLable' for='voltageMaxField'>Set voltage maximum:</lable>
+              <input id='voltageMaxField' type='number' value="1"></input>
+            </div>
+            <div class='form-sub'>
+              <br>
+              <button id='subButton' type='button'>Submit</button>
+            </div>
+          </form>
+        </px-card>
+
+
+          <div>
+            <p id='result'></p></div>
+          </div>
+
     </template>
     <script>
     const thrownErrorTurbine1 = false;
     const thrownErrorTurbine2 = false;
     const thrownErrorTurbine3 = false;
+    var tsChartInterval = setInterval(function(){},0); //Do nothing
+
+    var tempMinField = 60;
+    var tempMaxField = 90;
+    var voltageMinField = .4;
+    var voltageMaxField = 1;
+
+    var voltOk;
+    var tempOk;
 
     updateBoxesHeartbeat = function(id, data) {
         //console.log("I'm updating box " + id + " with heartbeat");
@@ -70,8 +106,6 @@ Component will query for new data when tags or dates are changed.
         if (document.getElementById(str + "heartbeat").innerHTML == "OFFLINE") {
           //window.alert("Turbine " + id + " needs immediate attention!");
           c.style.backgroundColor = "#7b3294";
-        } else {
-          c.style.backgroundColor = "#008837";
         }
     },
 
@@ -100,7 +134,7 @@ Component will query for new data when tags or dates are changed.
 
         if (data != null && !jQuery.isEmptyObject(JSON.parse(data))) {
           value = JSON.parse(data).value;
-
+          console.log("My value is you slut " + value + " also min is " + this.tempMinField);
           if (id == 1) {
               var c = document.getElementById(str + "rectangle");
               document.getElementById(str + "temperature").innerHTML = value;
@@ -110,6 +144,16 @@ Component will query for new data when tags or dates are changed.
           } else {
               var c = document.getElementById(str + "rectangle");
               document.getElementById(str + "temperature").innerHTML = value;
+          }
+          if(tempMinField > value || value > tempMaxField) {
+            tempOk = false;
+            c.style.backgroundColor = "#a6611a";
+          }
+          else {
+            tempOk = true;
+          }
+          if (tempOk == true && voltOk == true) {
+            c.style.backgroundColor = "#008837";
           }
         }
         else if (jQuery.isEmptyObject(JSON.parse(data))) {
@@ -181,6 +225,16 @@ Component will query for new data when tags or dates are changed.
           }
           c.style.backgroundColor = "#a6611a";
         }
+        if(this.voltageMinField > value || value > this.voltageMaxField || jQuery.isEmptyObject(JSON.parse(data))) {
+          voltOk = false;
+          c.style.backgroundColor = "#a6611a";
+        }
+        else {
+          voltOk = true;
+        }
+        if (tempOk == true && voltOk == true) {
+          c.style.backgroundColor = "#008837";
+        }
     },
 
     startVoltageCalls = function(id) {
@@ -203,29 +257,27 @@ Component will query for new data when tags or dates are changed.
       }, 2000);
     },
 
-    updateBoxesError = function(tag) {
-        if ( ((tag == "Compressor-2017:Turbine1Temperature") ||
-          ("Compressor-2017:Turbine1Voltage") ||
-          ("Compressor-2017:Turbine1Voltage")) && !this.thrownErrorTurbine1) { // IF Turbine 1 is down
-          this.thrownErrorTurbine1 = true;
-          window.alert("Turbine 1 needs immediate attention!");
-          var c = document.getElementById("turbine1rectangle");
-          document.getElementById("turbine1heartbeat").innerHTML = "OFFLINE";
-        } else if ( ((tag == "Compressor-2017:Turbine2Temperature") ||
-          ("Compressor-2017:Turbine2Voltage") ||
-          ("Compressor-2017:Turbine2Voltage")) && !this.thrownErrorTurbine2) { // IF Turbine 2 is down
-          this.thrownErrorTurbine2 = true;
-          window.alert("Turbine 1 needs immediate attention!");
-          var c = document.getElementById("turbine2rectangle");
-          document.getElementById("turbine2heartbeat").innerHTML = "OFFLINE";
-        } else if (!this.thrownErrorTurbine1) { // IF Turbine 3 is down
-          this.thrownErrorTurbine3 = true;
-          window.alert("Turbine 1 needs immediate attention!");
-          var c = document.getElementById("turbine3rectangle");
-          document.getElementById("turbine3heartbeat").innerHTML = "OFFLINE";
-        }
-        c.style.backgroundColor = "#7b3294";
-    },
+    updateBoxesError = function(id) {
+            if ( id == 1 ) { // IF Turbine 1 is down
+                if (this.thrownErrorTurbine1 != true) { // want to keeps
+                  this.thrownErrorTurbine1 = true;
+                  window.alert("Turbine 1 needs immediate attention!");
+                }
+            } else if ( id == 2 ) { // IF Turbine 2 is down
+                if (this.thrownErrorTurbine2 != true) { // want to keeped
+                 this.thrownErrorTurbine2 = true;
+                  window.alert("Turbine 2 needs immediate attention!");
+                }
+            } else { // IF Turbine 3 is down
+              if (this.thrownErrorTurbine3 != true) { // want to keeped
+                this.thrownErrorTurbine3 = true;
+                window.alert("Turbine 3 needs immediate attention!");
+              }
+            }
+            var c = document.getElementById("turbine" + id + "rectangle");
+            c.style.backgroundColor = "#7b3294";
+        },
+
 
     Polymer({
       is: 'timeseries-chart',
@@ -463,6 +515,7 @@ Component will query for new data when tags or dates are changed.
       },
 
       _showLiveSeries: function(tag) {
+        clearInterval(tsChartInterval); //Want to keep
         this.tsSeriesConfig = {};
         this.tsSeriesConfig = this._buildSeriesConfig([{name: tag}], this.tags);
         this.tsChartData = [];
@@ -478,37 +531,45 @@ Component will query for new data when tags or dates are changed.
         var self = this;
         var wsUrl;
         var type;
-        setInterval(function(){
+        var id;
+
+        tsChartInterval = setInterval(function(){
           ///console.log(array)
           if (tag == "Compressor-2017:Turbine1Temperature")
           {
             wsUrl = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/1/sensors/temperature";
             type = 1;
+            id = 1;
           }
           else if (tag == "Compressor-2017:Turbine2Temperature")
           {
             wsUrl = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/2/sensors/temperature";
             type = 1;
+            id = 2;
           }
           else if (tag == "Compressor-2017:Turbine3Temperature")
           {
             wsUrl = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/3/sensors/temperature";
             type = 1;
+            id = 3;
           }
           else if (tag == "Compressor-2017:Turbine1Voltage")
           {
             wsUrl = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/1/sensors/voltage";
             type = 2;
+            id = 1;
           }
           else if (tag == "Compressor-2017:Turbine2Voltage")
           {
             wsUrl = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/2/sensors/voltage";
             type = 2;
+            id = 2;
           }
           else if (tag == "Compressor-2017:Turbine3Voltage")
           {
             wsUrl = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/3/sensors/voltage";
             type = 2;
+            id = 3;
           }
 
           var xmlhttp = new XMLHttpRequest();
@@ -521,8 +582,10 @@ Component will query for new data when tags or dates are changed.
                 if (response != "null") {
                   self.push('tsChartData', {"x0": JSON.parse(response).timestamp, "y0": JSON.parse(response).value});
                 } else {
-                  updateBoxesError(tag);
+                  updateBoxesError(id);
                 }
+              } else {
+                updateBoxesError(id);
               }
             }
           }
@@ -566,7 +629,16 @@ Component will query for new data when tags or dates are changed.
       _setModeLabel: function(liveMode) {
         this.modeLabel = liveMode ? "Live Data" : "Historical Data";
       }
-
     });
+
+    function getUserInput() {
+        tempMinField = parseInt(document.getElementById('tempMinField').value);
+        tempMaxField = parseInt(document.getElementById('tempMaxField').value);
+        voltageMinField = parseInt(document.getElementById('voltageMinField').value);
+        voltageMaxField = parseInt(document.getElementById('voltageMaxField').value);
+    };
+
+    var subButton = document.getElementById('subButton');
+    subButton.addEventListener('click', getUserInput, false);
     </script>
 </dom-module>
