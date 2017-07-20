@@ -1,4 +1,4 @@
-<span style="font-size: 2em;" align="left;" valign="top;"> &nbsp;&nbsp;&nbsp;Question Mark is a mission-based team made up of 9 individuals from <br> different backgrounds that came together to deliver results in an uncertain<br> world. With Question Mark, our customers determine our success. </span>
+<span style="font-size: 2em;" align="left;" valign="top;"> &nbsp;&nbsp;&nbsp;Question Mark is a mission-based team made up of 9 individuals from different backgrounds that came together to deliver results in an uncertain world. With Question Mark, our customers determine our success. </span>
 
 
 
