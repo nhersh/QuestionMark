@@ -2,7 +2,7 @@
 
 
 
-<p style="width: 500px;" align="right;" valign="top">
+<p style="width: 500px;" align="center;">
   <img src="http://nerdsontherocks.com/wp-content/uploads/2012/02/the_riddler_insignia_by_acid_scum-d3685sp.png" height="300">
 </p>
 
