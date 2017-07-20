@@ -46,24 +46,12 @@ Component will query for new data when tags or dates are changed.
       <iron-ajax id="tsAjaxEl" content-type="application/json"></iron-ajax>
     </template>
     <script>
-      updateBoxes = function(data) {
-        console.log("I'm updating this box");
-        var rawData = JSON.parse(data);
+    const thrownErrorTurbine1 = false;
+    const thrownErrorTurbine2 = false;
+    const thrownErrorTurbine3 = false;
 
-        if (rawData.turbine_id == 1) {
-            var c = document.getElementById("turbine1rectangle");
-            document.getElementById("turbine1heartbeat").innerHTML = "ONLINE";
-        } else if (rawData.turbine_id == 2) {
-            var c = document.getElementById("turbine2rectangle");
-            document.getElementById("turbine2heartbeat").innerHTML = "ONLINE";
-        } else {
-            var c = document.getElementById("turbine3rectangle");
-            document.getElementById("turbine3heartbeat").innerHTML = "ONLINE";
-        }
-      },
-
-      updateBoxesHeartbeat = function(id, data) {
-        console.log("I'm updating box " + id);
+    updateBoxesHeartbeat = function(id, data) {
+        console.log("I'm updating box " + id + " with heartbeat");
         var str = "turbine" + id;
         status = JSON.parse(data).status;
 
@@ -84,13 +72,32 @@ Component will query for new data when tags or dates are changed.
         } else {
           c.style.backgroundColor = "#4cbb17";
         }
-      },
+    },
 
-      updateBoxesTemperature = function(id,data) {
+    startHeartbeatCalls = function(id) {
+      // Update heartbeat status of turbine 1
+      setInterval(function(){
+        var heartbeat = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/" + id + "/heartbeat";
+        console.log("Recording heartbeat: " + heartbeat + " for turbine " + id);
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function() {
+          if (xmlhttp.readyState == XMLHttpRequest.DONE) {
+            if (xmlhttp.status == 200) {
+              var response = xmlhttp.responseText;                
+              updateBoxesHeartbeat(id,response);
+            }
+          }
+        }
+      xmlhttp.open("GET", heartbeat, true);
+      xmlhttp.send();
+      }, 2000);
+    },
+
+    updateBoxesTemperature = function(id,data) {
         console.log("I'm updating box " + id + " with temperature");
         var str = "turbine" + id;
 
-        if (data != null) {
+        if (data != null || jQuery.isEmptyObject(data)) {
           value = JSON.parse(data).value;
 
           if (id == 1) {
@@ -104,13 +111,34 @@ Component will query for new data when tags or dates are changed.
               document.getElementById(str + "temperature").innerHTML = value;
           }
         }
-      },
+    },
 
-      updateBoxesVoltage = function(id,data) {
+    startTemperatureCalls = function(id) {
+      setInterval(function(){
+        var temperature = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/" + id + "/sensors/temperature";
+        console.log('recording temperature: ' + temperature);
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function() {
+          if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
+             if (xmlhttp.status == 200) {
+              var response = xmlhttp.responseText;
+              updateBoxesTemperature(id,response);
+            }
+          }
+        }
+
+        xmlhttp.open("GET", temperature, true);
+        if (document.getElementById("turbine" + id + "heartbeat").innerHTML == "ONLINE") {
+          xmlhttp.send();
+        }
+      }, 2000);
+    },
+
+    updateBoxesVoltage = function(id,data) {
         console.log("I'm updating box " + id + " with voltage");
         var str = "turbine" + id;
 
-        if (data != null) {
+        if (data != null || jQuery.isEmptyObject(data)) {
           value = JSON.parse(data).value;
 
           if (id == 1) {
@@ -124,28 +152,51 @@ Component will query for new data when tags or dates are changed.
               document.getElementById(str + "voltage").innerHTML = value;
           }
         }
-      },
+    },
 
-      updateBoxesError = function(tag) {
-        if ( (tag == "Compressor-2017:Turbine1Temperature") ||
+    startVoltageCalls = function(id) {
+      setInterval(function(){
+        var voltage = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/" + id + "/sensors/voltage";
+        console.log('recording voltage: ' + voltage);
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function() {
+          if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
+             if (xmlhttp.status == 200) {
+              var response = xmlhttp.responseText;
+              updateBoxesVoltage(id,response);
+            }
+          }
+        }
+        xmlhttp.open("GET", voltage, true);
+        if (document.getElementById("turbine" + id + "heartbeat").innerHTML == "ONLINE") {
+          xmlhttp.send();
+        }
+      }, 2000);
+    },
+
+    updateBoxesError = function(tag) {
+        if ( ((tag == "Compressor-2017:Turbine1Temperature") ||
           ("Compressor-2017:Turbine1Voltage") ||
-          ("Compressor-2017:Turbine1Voltage")) { // IF Turbine 1 is down
+          ("Compressor-2017:Turbine1Voltage")) && !this.thrownErrorTurbine1) { // IF Turbine 1 is down
+          this.thrownErrorTurbine1 = true;
           window.alert("Turbine 1 needs immediate attention!");
           var c = document.getElementById("turbine1rectangle");
           document.getElementById("turbine1heartbeat").innerHTML = "OFFLINE";
-        } else if ( (tag == "Compressor-2017:Turbine2Temperature") ||
+        } else if ( ((tag == "Compressor-2017:Turbine2Temperature") ||
           ("Compressor-2017:Turbine2Voltage") ||
-          ("Compressor-2017:Turbine2Voltage")) { // IF Turbine 2 is down
+          ("Compressor-2017:Turbine2Voltage")) && !this.thrownErrorTurbine2) { // IF Turbine 2 is down
+          this.thrownErrorTurbine2 = true;
           window.alert("Turbine 1 needs immediate attention!");
           var c = document.getElementById("turbine2rectangle");
           document.getElementById("turbine2heartbeat").innerHTML = "OFFLINE";
-        } else { // IF Turbine 3 is down
+        } else if (!this.thrownErrorTurbine1) { // IF Turbine 3 is down
+          this.thrownErrorTurbine3 = true;
           window.alert("Turbine 1 needs immediate attention!");
           var c = document.getElementById("turbine3rectangle");
           document.getElementById("turbine3heartbeat").innerHTML = "OFFLINE";
         }
         c.style.backgroundColor = "#FF0000";
-      },
+    },
 
     Polymer({
       is: 'timeseries-chart',
@@ -244,166 +295,13 @@ Component will query for new data when tags or dates are changed.
           }
         }.bind(this));
 
-          // Update heartbeat status of turbine 1
-          setInterval(function(){
-            var heartbeat = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/1/heartbeat";
-            console.log('recording heartbeat: ' + heartbeat);
-            var xmlhttp = new XMLHttpRequest();
-            xmlhttp.onreadystatechange = function() {
-              if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
-                 if (xmlhttp.status == 200) {
-                  var response = xmlhttp.responseText;
-                  updateBoxesHeartbeat(1,response);
-                }
-              }
-            }
-
-           xmlhttp.open("GET", heartbeat, true);
-           xmlhttp.send();
-      }, 2000);
-
-        // Update heartbeat status of turbine 2
-        setInterval(function(){
-          var heartbeat = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/2/heartbeat";
-          console.log('recording heartbeat: ' + heartbeat);
-          var xmlhttp = new XMLHttpRequest();
-          xmlhttp.onreadystatechange = function() {
-            if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
-               if (xmlhttp.status == 200) {
-                var response = xmlhttp.responseText;
-                updateBoxesHeartbeat(2,response);
-             xmlhttp.open("GET", heartbeat, true);
-             xmlhttp.send();
-           }
-         }
-        }
-      }, 2000);
-
-          // Update heartbeat status of turbine 3
-          setInterval(function(){
-            var heartbeat = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/3/heartbeat";
-            console.log('recording heartbeat: ' + heartbeat);
-            var xmlhttp = new XMLHttpRequest();
-            xmlhttp.onreadystatechange = function() {
-              if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
-                 if (xmlhttp.status == 200) {
-                  var response = xmlhttp.responseText;
-                  updateBoxesHeartbeat(3,response);
-                }
-              }
-            }
-
-             xmlhttp.open("GET", heartbeat, true);
-             xmlhttp.send();
-        }, 2000);
-
-      //Balint: Update voltage of turbine 1
-      setInterval(function(){
-        var voltage = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/1/sensors/voltage";
-        console.log('recording voltage: ' + voltage);
-        var xmlhttp = new XMLHttpRequest();
-        xmlhttp.onreadystatechange = function() {
-          if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
-             if (xmlhttp.status == 200) {
-              var response = xmlhttp.responseText;
-              updateBoxesVoltage(1,response);
-            }
-          }
+        // Begin continuous update of turbine rectangles
+        for (var i = 1; i <= 3; i++) {
+          startHeartbeatCalls(i);
+          startTemperatureCalls(i);
+          startVoltageCalls(i);
         }
 
-         xmlhttp.open("GET", voltage, true);
-         xmlhttp.send();
-    }, 2000);
-
-      //Balint: Update voltage of turbine 2
-      setInterval(function(){
-        var voltage = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/2/sensors/voltage";
-        console.log('recording voltage: ' + voltage);
-        var xmlhttp = new XMLHttpRequest();
-        xmlhttp.onreadystatechange = function() {
-          if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
-             if (xmlhttp.status == 200) {
-              var response = xmlhttp.responseText;
-              updateBoxesVoltage(2,response);
-            }
-          }
-        }
-
-         xmlhttp.open("GET", voltage, true);
-         xmlhttp.send();
-    }, 2000);
-
-      //Balint: Update voltage of turbine 3
-      setInterval(function(){
-        var voltage = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/3/sensors/voltage";
-        console.log('recording voltage: ' + voltage);
-        var xmlhttp = new XMLHttpRequest();
-        xmlhttp.onreadystatechange = function() {
-          if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
-             if (xmlhttp.status == 200) {
-              var response = xmlhttp.responseText;
-              updateBoxesVoltage(3,response);
-            }
-          }
-        }
-
-         xmlhttp.open("GET", voltage, true);
-         xmlhttp.send();
-    }, 2000);
-
-      //Balint: Update temperature of turbine 1
-      setInterval(function(){
-        var temperature = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/1/sensors/temperature";
-        console.log('recording temperature: ' + temperature);
-        var xmlhttp = new XMLHttpRequest();
-        xmlhttp.onreadystatechange = function() {
-          if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
-             if (xmlhttp.status == 200) {
-              var response = xmlhttp.responseText;
-              updateBoxesTemperature(1,response);
-            }
-          }
-        }
-
-         xmlhttp.open("GET", temperature, true);
-         xmlhttp.send();
-    }, 2000);
-
-      //Balint: Update temperature of turbine 2
-      setInterval(function(){
-        var temperature = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/2/sensors/temperature";
-        console.log('recording temperature: ' + temperature);
-        var xmlhttp = new XMLHttpRequest();
-        xmlhttp.onreadystatechange = function() {
-          if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
-             if (xmlhttp.status == 200) {
-              var response = xmlhttp.responseText;
-              updateBoxesTemperature(2,response);
-            }
-          }
-        }
-
-         xmlhttp.open("GET", temperature, true);
-         xmlhttp.send();
-    }, 2000);
-
-      //Balint: Update temperature of turbine 3
-      setInterval(function(){
-        var temperature = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/3/sensors/temperature";
-        console.log('recording temperature: ' + temperature);
-        var xmlhttp = new XMLHttpRequest();
-        xmlhttp.onreadystatechange = function() {
-          if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
-             if (xmlhttp.status == 200) {
-              var response = xmlhttp.responseText;
-              updateBoxesTemperature(3,response);
-            }
-          }
-        }
-
-         xmlhttp.open("GET", temperature, true);
-         xmlhttp.send();
-    }, 2000);
       },
 
       _getFirstSelectedTag: function(tags) {
