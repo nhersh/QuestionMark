@@ -84,8 +84,12 @@ Component will query for new data when tags or dates are changed.
     var voltageMinField = .4;
     var voltageMaxField = 1;
 
-    var voltOk;
-    var tempOk;
+    var voltOk1;
+    var tempOk1;
+    var voltOk2;
+    var tempOk2;
+    var voltOk3;
+    var tempOk3;
 
     updateBoxesHeartbeat = function(id, data) {
         //console.log("I'm updating box " + id + " with heartbeat");
@@ -134,7 +138,7 @@ Component will query for new data when tags or dates are changed.
 
         if (data != null && !jQuery.isEmptyObject(JSON.parse(data))) {
           value = JSON.parse(data).value;
-          console.log("My value is you slut " + value + " also min is " + this.tempMinField);
+          console.log("Temp is " + value + " also min is " + this.tempMinField);
           if (id == 1) {
               var c = document.getElementById(str + "rectangle");
               document.getElementById(str + "temperature").innerHTML = value;
@@ -146,13 +150,23 @@ Component will query for new data when tags or dates are changed.
               document.getElementById(str + "temperature").innerHTML = value;
           }
           if(tempMinField > value || value > tempMaxField) {
-            tempOk = false;
+            if (id == 1) { tempOk1 = false; }
+            else if (id == 2) { tempOk2 = false; }
+            else { tempOk3 = false; }
             c.style.backgroundColor = "#a6611a";
           }
           else {
-            tempOk = true;
+            if (id == 1) { tempOk1 = true; }
+            else if (id == 2) { tempOk2 = true; }
+            else { tempOk3 = true; }
           }
-          if (tempOk == true && voltOk == true) {
+          if (tempOk1 == true && voltOk1 == true) {
+            c.style.backgroundColor = "#008837";
+          }
+          if (tempOk2 == true && voltOk2 == true) {
+            c.style.backgroundColor = "#008837";
+          }
+          if (tempOk3 == true && voltOk3 == true) {
             c.style.backgroundColor = "#008837";
           }
         }
@@ -201,12 +215,14 @@ Component will query for new data when tags or dates are changed.
         if (data != null && !jQuery.isEmptyObject(JSON.parse(data))) {
           value = JSON.parse(data).value;
 
+
           if (id == 1) {
               var c = document.getElementById(str + "rectangle");
               document.getElementById(str + "voltage").innerHTML = value;
           } else if (id == 2) {
               var c = document.getElementById(str + "rectangle");
               document.getElementById(str + "voltage").innerHTML = value;
+              console.log("Voltage is " + value + " also min is " + this.voltageMinField);
           } else {
               var c = document.getElementById(str + "rectangle");
               document.getElementById(str + "voltage").innerHTML = value;
@@ -226,13 +242,23 @@ Component will query for new data when tags or dates are changed.
           c.style.backgroundColor = "#a6611a";
         }
         if(this.voltageMinField > value || value > this.voltageMaxField || jQuery.isEmptyObject(JSON.parse(data))) {
-          voltOk = false;
+          if (id == 1) { voltOk1 = false; }
+          else if (id == 2) { voltOk2 = false; }
+          else { voltOk3 = false; }
           c.style.backgroundColor = "#a6611a";
         }
         else {
-          voltOk = true;
+          if (id == 1) { voltOk1 = true; }
+          else if (id == 2) { voltOk2 = true; }
+          else { voltOk3 = true; }
         }
-        if (tempOk == true && voltOk == true) {
+        if (tempOk1 == true && voltOk1 == true) {
+          c.style.backgroundColor = "#008837";
+        }
+        if (tempOk2 == true && voltOk2 == true) {
+          c.style.backgroundColor = "#008837";
+        }
+        if (tempOk3 == true && voltOk3 == true) {
           c.style.backgroundColor = "#008837";
         }
     },
@@ -632,10 +658,10 @@ Component will query for new data when tags or dates are changed.
     });
 
     function getUserInput() {
-        tempMinField = parseInt(document.getElementById('tempMinField').value);
-        tempMaxField = parseInt(document.getElementById('tempMaxField').value);
-        voltageMinField = parseInt(document.getElementById('voltageMinField').value);
-        voltageMaxField = parseInt(document.getElementById('voltageMaxField').value);
+        tempMinField = parseFloat(document.getElementById('tempMinField').value);
+        tempMaxField = parseFloat(document.getElementById('tempMaxField').value);
+        voltageMinField = parseFloat(document.getElementById('voltageMinField').value);
+        voltageMaxField = parseFloat(document.getElementById('voltageMaxField').value);
     };
 
     var subButton = document.getElementById('subButton');
