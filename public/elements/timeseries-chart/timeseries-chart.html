@@ -8,6 +8,7 @@
 <link rel="import" href="timeseries-chart-styles.html">
 
 <script src="../../bower_components/moment/min/moment.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
 <!--
 This component allows users to select timeseries tag(s) for display on a chart.
@@ -51,7 +52,7 @@ Component will query for new data when tags or dates are changed.
     const thrownErrorTurbine3 = false;
 
     updateBoxesHeartbeat = function(id, data) {
-        console.log("I'm updating box " + id + " with heartbeat");
+        //console.log("I'm updating box " + id + " with heartbeat");
         var str = "turbine" + id;
         status = JSON.parse(data).status;
 
@@ -67,10 +68,10 @@ Component will query for new data when tags or dates are changed.
         }
 
         if (document.getElementById(str + "heartbeat").innerHTML == "OFFLINE") {
-          window.alert("Turbine " + id + " needs immediate attention!");
-          c.style.backgroundColor = "#FF0000";
+          //window.alert("Turbine " + id + " needs immediate attention!");
+          c.style.backgroundColor = "#7b3294";
         } else {
-          c.style.backgroundColor = "#4cbb17";
+          c.style.backgroundColor = "#008837";
         }
     },
 
@@ -78,12 +79,12 @@ Component will query for new data when tags or dates are changed.
       // Update heartbeat status of turbine 1
       setInterval(function(){
         var heartbeat = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/" + id + "/heartbeat";
-        console.log("Recording heartbeat: " + heartbeat + " for turbine " + id);
+        //console.log("Recording heartbeat: " + heartbeat + " for turbine " + id);
         var xmlhttp = new XMLHttpRequest();
         xmlhttp.onreadystatechange = function() {
           if (xmlhttp.readyState == XMLHttpRequest.DONE) {
             if (xmlhttp.status == 200) {
-              var response = xmlhttp.responseText;                
+              var response = xmlhttp.responseText;
               updateBoxesHeartbeat(id,response);
             }
           }
@@ -94,10 +95,10 @@ Component will query for new data when tags or dates are changed.
     },
 
     updateBoxesTemperature = function(id,data) {
-        console.log("I'm updating box " + id + " with temperature");
+        //console.log("I'm updating box " + id + " with temperature");
         var str = "turbine" + id;
 
-        if (data != null || jQuery.isEmptyObject(data)) {
+        if (data != null && !jQuery.isEmptyObject(JSON.parse(data))) {
           value = JSON.parse(data).value;
 
           if (id == 1) {
@@ -111,12 +112,27 @@ Component will query for new data when tags or dates are changed.
               document.getElementById(str + "temperature").innerHTML = value;
           }
         }
+        else if (jQuery.isEmptyObject(JSON.parse(data))) {
+          value = JSON.parse(data).value;
+
+          if (id == 1) {
+              var c = document.getElementById(str + "rectangle");
+              document.getElementById(str + "temperature").innerHTML = "Please Service Temperature Sensor";
+          } else if (id == 2) {
+              var c = document.getElementById(str + "rectangle");
+              document.getElementById(str + "temperature").innerHTML = "Please Service Temperature Sensor";
+          } else {
+              var c = document.getElementById(str + "rectangle");
+              document.getElementById(str + "temperature").innerHTML = "Please Service Temperature Sensor";
+          }
+          c.style.backgroundColor = "#a6611a";
+        }
     },
 
     startTemperatureCalls = function(id) {
       setInterval(function(){
         var temperature = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/" + id + "/sensors/temperature";
-        console.log('recording temperature: ' + temperature);
+        //console.log('recording temperature: ' + temperature);
         var xmlhttp = new XMLHttpRequest();
         xmlhttp.onreadystatechange = function() {
           if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
@@ -135,10 +151,10 @@ Component will query for new data when tags or dates are changed.
     },
 
     updateBoxesVoltage = function(id,data) {
-        console.log("I'm updating box " + id + " with voltage");
+        //console.log("I'm updating box " + id + " with voltage");
         var str = "turbine" + id;
 
-        if (data != null || jQuery.isEmptyObject(data)) {
+        if (data != null && !jQuery.isEmptyObject(JSON.parse(data))) {
           value = JSON.parse(data).value;
 
           if (id == 1) {
@@ -152,12 +168,25 @@ Component will query for new data when tags or dates are changed.
               document.getElementById(str + "voltage").innerHTML = value;
           }
         }
+        else if (jQuery.isEmptyObject(JSON.parse(data))) {
+          if (id == 1) {
+              var c = document.getElementById(str + "rectangle");
+              document.getElementById(str + "voltage").innerHTML = "Please Service Voltage Sensor";
+          } else if (id == 2) {
+              var c = document.getElementById(str + "rectangle");
+              document.getElementById(str + "voltage").innerHTML = "Please Service Voltage Sensor";
+          } else {
+              var c = document.getElementById(str + "rectangle");
+              document.getElementById(str + "voltage").innerHTML = "Please Service Voltage Sensor";
+          }
+          c.style.backgroundColor = "#a6611a";
+        }
     },
 
     startVoltageCalls = function(id) {
       setInterval(function(){
         var voltage = "https://turbine-farm.run.aws-usw02-pr.ice.predix.io/api/turbines/" + id + "/sensors/voltage";
-        console.log('recording voltage: ' + voltage);
+        //console.log('recording voltage: ' + voltage);
         var xmlhttp = new XMLHttpRequest();
         xmlhttp.onreadystatechange = function() {
           if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
@@ -195,7 +224,7 @@ Component will query for new data when tags or dates are changed.
           var c = document.getElementById("turbine3rectangle");
           document.getElementById("turbine3heartbeat").innerHTML = "OFFLINE";
         }
-        c.style.backgroundColor = "#FF0000";
+        c.style.backgroundColor = "#7b3294";
     },
 
     Polymer({
@@ -488,16 +517,11 @@ Component will query for new data when tags or dates are changed.
             if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
                if (xmlhttp.status == 200) {
                 var response = xmlhttp.responseText;
-
-                if (response != null) {
-                 if (type == 1)
-                 {
-                    self.push('tsChartData', {"x0": JSON.parse(response).timestamp, "y0": JSON.parse(response).value});
-                  }
-                  else if (type == 2)
-                  {
-                    self.push('tsChartData', {"x0": JSON.parse(response).timestamp, "y0": JSON.parse(response).value});
-                 i }
+                console.log("My URL was: " + wsUrl + " and the res was: " + response);
+                if (response != "null") {
+                  self.push('tsChartData', {"x0": JSON.parse(response).timestamp, "y0": JSON.parse(response).value});
+                } else {
+                  updateBoxesError(tag);
                 }
               }
             }
@@ -505,9 +529,6 @@ Component will query for new data when tags or dates are changed.
 
            xmlhttp.open("GET", wsUrl, true);
            xmlhttp.send();
-
-          if (true) {
-          }
       }, 3000);
       },
 
